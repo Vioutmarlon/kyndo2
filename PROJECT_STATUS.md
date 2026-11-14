@@ -44,3 +44,7 @@ Corrigir erros bloqueantes de build e estabilizar a branch fix/build-errors-p0.
 - Branch: ``fix/build-errors-p0``
 - Repositório: https://github.com/Vioutmarlon/kyndo2
 
+
+## Bloqueios registrados
+- GitHub API: 403 Forbidden para criação de Issue e PR via integração Codex. Branch ix/build-errors-p0 foi pushada com sucesso.
+- PR deve ser criado manualmente em: https://github.com/Vioutmarlon/kyndo2/pull/new/fix/build-errors-p0

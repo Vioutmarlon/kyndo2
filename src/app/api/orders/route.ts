@@ -1,9 +1,8 @@
-
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 import { NextResponse, type NextRequest } from "next/server"
 import { z } from "zod"
- import { checkRateLimit, applySecurityHeaders } from "@/lib/api-middleware"
+import { checkRateLimit, applySecurityHeaders } from "@/lib/api-middleware"
 
 const orderItemSchema = z.object({
   product_id: z.string().uuid(),
@@ -59,6 +58,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Loja fechada no momento" }, { status: 400 })
     }
 
+    // Server-side price validation: fetch real prices from DB
+    const productIds = validated.items.map((i) => i.product_id)
+    const { data: dbProducts, error: prodError } = await supabase
+      .from("products")
+      .select("id, price, is_available, tenant_id")
+      .in("id", productIds)
+      .eq("tenant_id", validated.tenant_id)
+
+    if (prodError || !dbProducts || dbProducts.length !== productIds.length) {
+      return NextResponse.json({ error: "Um ou mais produtos não foram encontrados nesta loja" }, { status: 400 })
+    }
+
+    const priceMap = new Map(dbProducts.map((p) => [p.id, p]))
+    let serverSubtotal = 0
+    for (const item of validated.items) {
+      const dbProduct = priceMap.get(item.product_id)
+      if (!dbProduct || !dbProduct.is_available) {
+        return NextResponse.json({ error: `Produto indisponível: ${item.product_name}` }, { status: 400 })
+      }
+      serverSubtotal += Number(dbProduct.price) * item.quantity
+    }
+
     let discount = validated.discount
     if (validated.coupon_code) {
       const { data: coupon } = await supabase
@@ -76,7 +97,7 @@ export async function POST(request: NextRequest) {
         if (coupon.max_uses > 0 && coupon.current_uses >= coupon.max_uses) {
           return NextResponse.json({ error: "Cupom esgotado" }, { status: 400 })
         }
-        if (validated.subtotal < coupon.min_order) {
+        if (serverSubtotal < coupon.min_order) {
           return NextResponse.json(
             { error: `Pedido mínimo para este cupom: R$ ${coupon.min_order}` },
             { status: 400 }
@@ -85,7 +106,7 @@ export async function POST(request: NextRequest) {
 
         discount =
           coupon.discount_type === "percentage"
-            ? validated.subtotal * (coupon.discount_value / 100)
+            ? serverSubtotal * (coupon.discount_value / 100)
             : coupon.discount_value
 
         await supabase
@@ -96,7 +117,7 @@ export async function POST(request: NextRequest) {
     }
 
     const deliveryFee = validated.delivery_type === "delivery" ? (tenant.delivery_fee ?? 0) : 0
-    const total = validated.subtotal - discount + deliveryFee
+    const total = serverSubtotal - discount + deliveryFee
 
     const { data: order, error } = await supabase
       .from("orders")
@@ -105,7 +126,7 @@ export async function POST(request: NextRequest) {
         customer_name: validated.customer_name,
         customer_phone: validated.customer_phone,
         items: validated.items,
-        subtotal: validated.subtotal,
+        subtotal: serverSubtotal,
         discount,
         total,
         address: validated.address,
@@ -126,11 +147,10 @@ export async function POST(request: NextRequest) {
     return applySecurityHeaders(response)
   } catch (err) {
     if (err instanceof z.ZodError) {
-       const response = NextResponse.json({ error: err.issues }, { status: 400 })
+      const response = NextResponse.json({ error: err.issues }, { status: 400 })
       return applySecurityHeaders(response)
     }
     const response = NextResponse.json({ error: "Erro interno" }, { status: 500 })
     return applySecurityHeaders(response)
   }
 }
-
