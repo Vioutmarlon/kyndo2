@@ -1,69 +1,95 @@
-import Image from "next/image";
+import Link from "next/link"
+import { ArrowRight, Store, Shield, Zap } from "lucide-react"
 
-export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+export default function HomePage() {
+ return (
+ <div className="min-h-screen font-sans" style={{ background: "var(--kyndo-ice)", color: "var(--kyndo-graphite)" }}>
+ {/* Header */}
+ <header className="border-b border-zinc-200 bg-white/80 backdrop-blur sticky top-0 z-50">
+ <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+ <Link href="/" className="flex items-center gap-1 kyndo-wordmark text-xl">
+ <span style={{ color: "var(--kyndo-graphite)" }}>kyndo</span>
+ <span className="dot">.</span>
+ <span className="font-medium ml-1 tracking-wide text-sm" style={{ color: "var(--kyndo-slate)" }}>ORDER</span>
+ </Link>
+ <Link
+ href="/admin/login"
+ className="text-sm font-medium transition-colors hover:opacity-80"
+ style={{ color: "var(--kyndo-slate)" }}
+ >
+ Área do Lojista
+ </Link>
+ </div>
+ </header>
+
+ {/* Hero */}
+ <section className="max-w-4xl mx-auto px-4 py-20 text-center">
+ <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6" style={{ color: "var(--kyndo-graphite)" }}>
+ Seu próprio app de pedidos{" "}
+ <span style={{ color: "var(--kyndo-orange)" }}>sem taxa por venda</span>
+ </h1>
+ <p className="text-lg md:text-xl max-w-2xl mx-auto mb-10" style={{ color: "var(--kyndo-slate)" }}>
+ Substitua o iFood pelo seu próprio sistema. Pedidos chegam formatados no WhatsApp,
+ sem comissão, sem app pra baixar. A partir de R$47/mês.
+ </p>
+ <div className="flex flex-col sm:flex-row gap-4 justify-center">
+ <Link
+ href="/demo"
+ className="text-white font-bold px-8 py-4 rounded-xl transition-colors flex items-center justify-center gap-2 text-lg shadow-lg"
+ style={{ background: "var(--kyndo-orange)", boxShadow: "0 10px 25px -5px rgba(255,107,53,0.3)" }}
+ >
+ Ver Demo Ao Vivo <ArrowRight className="w-5 h-5" />
+ </Link>
+ <Link
+ href="/admin/login"
+ className="bg-white border border-zinc-200 hover:border-orange-400 font-medium px-8 py-4 rounded-xl transition-colors text-lg"
+ style={{ color: "var(--kyndo-graphite)" }}
+ >
+ Já sou cliente
+ </Link>
+ </div>
+ </section>
+
+ {/* Features */}
+ <section className="max-w-5xl mx-auto px-4 py-16 grid md:grid-cols-3 gap-6">
+ {[
+ {
+ icon: Store,
+ title: "Loja White-Label",
+ desc: "Cada cliente tem sua própria loja com logo, cores e domínio personalizado.",
+ },
+ {
+ icon: Shield,
+ title: "Dados Isolados",
+ desc: "Multi-tenant com RLS no Supabase. Cada lojista só vê seus próprios dados.",
+ },
+ {
+ icon: Zap,
+ title: "Pedido no WhatsApp",
+ desc: "Sem gateway de pagamento complexo. O pedido chega pronto pro estabelecimento.",
+ },
+ ].map((feature) => (
+ <div
+ key={feature.title}
+ className="rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow border border-zinc-100"
+ style={{ background: "var(--kyndo-white)" }}
+ >
+ <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ background: "var(--kyndo-orange-soft)" }}>
+ <feature.icon className="w-6 h-6" style={{ color: "var(--kyndo-orange)" }} />
+ </div>
+ <h3 className="font-bold text-lg mb-2" style={{ color: "var(--kyndo-graphite)" }}>{feature.title}</h3>
+ <p className="text-sm leading-relaxed" style={{ color: "var(--kyndo-slate)" }}>{feature.desc}</p>
+ </div>
+ ))}
+ </section>
+
+ {/* Footer */}
+ <footer className="border-t border-zinc-200 py-8 text-center text-sm" style={{ color: "var(--kyndo-slate)" }}>
+ <p>
+ <span className="kyndo-wordmark"><span style={{ color: "var(--kyndo-graphite)" }}>kyndo</span><span className="dot">.</span></span>
+ {" "}ORDER &copy; 2026 — Gestão de delivery para restaurantes
+ </p>
+ </footer>
+ </div>
+ )
 }

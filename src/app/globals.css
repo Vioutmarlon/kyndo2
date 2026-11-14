@@ -1,8 +1,35 @@
 @import "tailwindcss";
 
+/* ============================================================
+   KYNDO ORDER — Design Tokens
+   Identidade visual oficial da plataforma SaaS
+   ============================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Cores Principais */
+  --kyndo-orange: #FF6B35;
+  --kyndo-orange-hover: #E85A25;
+  --kyndo-orange-soft: #FFF0E9;
+  --kyndo-graphite: #191B20;
+  --kyndo-slate: #414650;
+  --kyndo-ice: #F6F7F9;
+  --kyndo-white: #FFFFFF;
+
+  /* Cores Funcionais */
+  --kyndo-success: #16A34A;
+  --kyndo-info: #2563EB;
+  --kyndo-warning: #F59E0B;
+  --kyndo-danger: #DC3545;
+
+  /* Tons derivados para backgrounds de badges/status */
+  --kyndo-success-bg: #DCFCE7;
+  --kyndo-info-bg: #DBEAFE;
+  --kyndo-warning-bg: #FEF3C7;
+  --kyndo-danger-bg: #FEE2E2;
+
+  /* Mapeamento para Tailwind via @theme */
+  --background: var(--kyndo-ice);
+  --foreground: var(--kyndo-graphite);
 }
 
 @theme inline {
@@ -10,17 +37,38 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Kyndo Design Tokens como cores Tailwind */
+  --color-kyndo-orange: var(--kyndo-orange);
+  --color-kyndo-orange-hover: var(--kyndo-orange-hover);
+  --color-kyndo-orange-soft: var(--kyndo-orange-soft);
+  --color-kyndo-graphite: var(--kyndo-graphite);
+  --color-kyndo-slate: var(--kyndo-slate);
+  --color-kyndo-ice: var(--kyndo-ice);
+  --color-kyndo-white: var(--kyndo-white);
+  --color-kyndo-success: var(--kyndo-success);
+  --color-kyndo-info: var(--kyndo-info);
+  --color-kyndo-warning: var(--kyndo-warning);
+  --color-kyndo-danger: var(--kyndo-danger);
+  --color-kyndo-success-bg: var(--kyndo-success-bg);
+  --color-kyndo-info-bg: var(--kyndo-info-bg);
+  --color-kyndo-warning-bg: var(--kyndo-warning-bg);
+  --color-kyndo-danger-bg: var(--kyndo-danger-bg);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Wordmark provisório kyndo. */
+.kyndo-wordmark {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.kyndo-wordmark .dot {
+  color: var(--kyndo-orange);
 }

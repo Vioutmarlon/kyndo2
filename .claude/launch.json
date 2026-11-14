@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "delivery-saas": {
+      "command": "npm run dev",
+      "port": 3000,
+      "cwd": "."
+    }
+  }
+}
