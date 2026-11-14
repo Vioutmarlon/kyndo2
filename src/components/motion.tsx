@@ -340,10 +340,12 @@ export function InteractiveCard({
   children,
   className = "",
   onClick,
+  style,
 }: {
   children: ReactNode
   className?: string
   onClick?: () => void
+  style?: React.CSSProperties
 }) {
   return (
     <motion.div
@@ -357,6 +359,7 @@ export function InteractiveCard({
       className={className}
       style={{
         cursor: onClick ? "pointer" : undefined,
+        ...style,
       }}
     >
       {children}

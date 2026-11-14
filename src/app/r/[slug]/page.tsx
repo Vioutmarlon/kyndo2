@@ -6,7 +6,7 @@ import { formatCurrency } from "@/lib/utils"
 import { LazyImage } from "@/components/motion"
 import type { Tenant, Category, Product } from "@/lib/supabase"
 
-export const dynamic = "force-dynamic"
+export const instant = false
 
 // Tokens Kyndo Order
 const T = {
