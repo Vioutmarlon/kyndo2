@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { formatCurrency } from "@/lib/utils"
-import { motion } from "framer-motion"
 import type { Tenant, Product } from "@/lib/supabase"
 import {
  Plus, Package, Settings, LogOut, Sparkles, Menu, X,
@@ -47,8 +46,8 @@ const DEMO_PRODUCTS: (Product & { categories?: { name: string } })[] = [
  { id: "prod-001", tenant_id: "demo", category_id: "cat-001", name: "X-Bacon Artesanal", description: "Hambúrguer 180g, bacon crocante, cheddar", price: 32.9, image_url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=100&h=100&fit=crop", is_available: true, has_options: true, options: [], extras: [], categories: { name: "🍔 Hambúrgueres" } },
  { id: "prod-002", tenant_id: "demo", category_id: "cat-001", name: "Double Smash Burger", description: "Dois smash burgers 90g, queijo americano", price: 38.9, image_url: "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=100&h=100&fit=crop", is_available: true, has_options: true, options: [], extras: [], categories: { name: "🍔 Hambúrgueres" } },
  { id: "prod-003", tenant_id: "demo", category_id: "cat-001", name: "Veggie Burger", description: "Grão-de-bico, rúcula, tomate seco", price: 29.9, image_url: "https://images.unsplash.com/photo-1520072959219-c595dc870360?w=100&h=100&fit=crop", is_available: true, has_options: false, options: [], extras: [], categories: { name: "🍔 Hambúrgueres" } },
- { id: "prod-004", tenant_id: "demo", category_id: "cat-002", name: "Coca-Cola Lata", description: "350ml gelada", price: 6.0, image_url: "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=100&h=100&fit=crop", is_available: true, has_options: false, options: [], extras: [], categories: { name: "🥤 Bebidas" } },
- { id: "prod-005", tenant_id: "demo", category_id: "cat-002", name: "Suco Natural", description: "Laranja ou Limão - 400ml", price: 10.0, is_available: true, has_options: true, options: [], extras: [], categories: { name: "🥤 Bebidas" } },
+ { id: "prod-004", tenant_id: "demo", category_id: "cat-002", name: "Coca-Cola Lata", description: "350ml gelada", price: 6.0, image_url: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=100&h=100&fit=crop", is_available: true, has_options: false, options: [], extras: [], categories: { name: "🥤 Bebidas" } },
+ { id: "prod-005", tenant_id: "demo", category_id: "cat-002", name: "Suco Natural", description: "Laranja ou Limão - 400ml", price: 10.0, image_url: "https://images.unsplash.com/photo-1613478223719-2ab802602423?w=100&h=100&fit=crop", is_available: true, has_options: true, options: [], extras: [], categories: { name: "🥤 Bebidas" } },
  { id: "prod-006", tenant_id: "demo", category_id: "cat-003", name: "Batata Frita", description: "Porção generosa com sal e orégano", price: 18.0, image_url: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=100&h=100&fit=crop", is_available: true, has_options: false, options: [], extras: [], categories: { name: "🍟 Acompanhamentos" } },
  { id: "prod-007", tenant_id: "demo", category_id: "cat-003", name: "Onion Rings", description: "Anéis de cebola empanados e fritos", price: 22.0, image_url: "https://images.unsplash.com/photo-1639024471283-03518883512d?w=100&h=100&fit=crop", is_available: true, has_options: false, options: [], extras: [], categories: { name: "🍟 Acompanhamentos" } },
  { id: "prod-008", tenant_id: "demo", category_id: "cat-004", name: "Brownie com Sorvete", description: "Chocolate quente com sorvete de creme", price: 24.0, image_url: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=100&h=100&fit=crop", is_available: true, has_options: false, options: [], extras: [], categories: { name: "🍰 Sobremesas" } },
@@ -253,14 +252,14 @@ export function AdminDashboard({ tenant, products }: { tenant: Tenant; products:
  { icon: UtensilsCrossed, iconBg: C.orangeSoft, iconColor: C.orange, label: "Mais Vendido", value: "X-Bacon", sub: "47 vendas esta semana" },
  ].map((kpi, i) => (
  <StaggerItem key={i}>
- <motion.div whileHover={{ boxShadow: "0px 0px 0px 1px rgba(0,0,0,0.08), 0px 1px 2px -1px rgba(0,0,0,0.08), 0px 4px 8px 0px rgba(0,0,0,0.06)" }} whileTap={{ scale: 0.97 }} transition={{ duration: 0.15 }} style={{ background: C.white, borderRadius: 14, padding: 20, border: `1px solid ${C.border}`, boxShadow: C.shadow }}>
+ <InteractiveCard style={{ background: C.white, borderRadius: 14, padding: 20, border: `1px solid ${C.border}`, boxShadow: C.shadow }}>
  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
  <div style={{ width: 40, height: 40, borderRadius: 10, background: kpi.iconBg, display: "flex", alignItems: "center", justifyContent: "center" }}><kpi.icon size={20} color={kpi.iconColor} /></div>
  <span style={{ fontSize: 13, fontWeight: 500, color: C.slate }}>{kpi.label}</span>
  </div>
  <p style={{ fontSize: 28, fontWeight: 800, color: C.graphite, margin: 0, letterSpacing: "-0.02em" }}>{kpi.value}</p>
  <p style={{ fontSize: 12, color: C.slate, marginTop: 4 }}>{kpi.sub}</p>
- </motion.div>
+ </InteractiveCard>
  </StaggerItem>
  ))}
  </div>
@@ -346,7 +345,7 @@ export function AdminDashboard({ tenant, products }: { tenant: Tenant; products:
  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
  {displayProducts.map(product => (
  <StaggerItem key={product.id}>
- <motion.div whileHover={{ boxShadow: "0px 0px 0px 1px rgba(0,0,0,0.08), 0px 1px 2px -1px rgba(0,0,0,0.08), 0px 4px 8px 0px rgba(0,0,0,0.06)" }} whileTap={{ scale: 0.97 }} transition={{ duration: 0.15 }} style={{ background: C.white, borderRadius: 12, padding: 16, display: "flex", alignItems: "center", gap: 16, border: `1px solid ${C.border}`, boxShadow: C.shadow }}>
+ <MotionDiv whileHover={{ boxShadow: "0px 0px 0px 1px rgba(0,0,0,0.08), 0px 1px 2px -1px rgba(0,0,0,0.08), 0px 4px 8px 0px rgba(0,0,0,0.06)" }} whileTap={{ scale: 0.97 }} transition={{ duration: 0.15 }} style={{ background: C.white, borderRadius: 12, padding: 16, display: "flex", alignItems: "center", gap: 16, border: `1px solid ${C.border}`, boxShadow: C.shadow }}>
  <LazyImage src={product.image_url} alt={product.name} width={56} height={56} />
  <div style={{ flex: 1, minWidth: 0 }}>
  <h3 style={{ fontWeight: 600, color: C.graphite, margin: 0, fontSize: 14 }}>{product.name}</h3>
@@ -360,7 +359,7 @@ export function AdminDashboard({ tenant, products }: { tenant: Tenant; products:
  <MotionButton whileHover={{ scale: 1.1, background: C.ice }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.15 }} style={{ padding: 8, borderRadius: 8, border: "none", background: "transparent", cursor: "pointer" }}><Edit size={16} color={C.slate} /></MotionButton>
  <MotionButton whileHover={{ scale: 1.1, background: C.dangerBg }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.15 }} style={{ padding: 8, borderRadius: 8, border: "none", background: "transparent", cursor: "pointer" }}><Trash2 size={16} color={C.danger} /></MotionButton>
  </div>
- </motion.div>
+ </MotionDiv>
  </StaggerItem>
  ))}
  </div>
