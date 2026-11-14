@@ -1,8 +1,9 @@
-import { createRouteHandlerClient } from "@supabase/ssr"
+
+import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 import { NextResponse, type NextRequest } from "next/server"
 import { z } from "zod"
-import { checkRateLimit, applySecurityHeaders } from "../_middleware"
+ import { checkRateLimit, applySecurityHeaders } from "@/lib/api-middleware"
 
 const productSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
@@ -25,7 +26,11 @@ const productSchema = z.object({
 
 async function getTenantId() {
   const cookieStore = await cookies()
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
+  )
 
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) return null
@@ -40,7 +45,6 @@ async function getTenantId() {
 }
 
 export async function GET(request: NextRequest) {
-  // Rate limiting
   const rateLimitResponse = checkRateLimit(request)
   if (rateLimitResponse) return applySecurityHeaders(rateLimitResponse)
 
@@ -51,7 +55,11 @@ export async function GET(request: NextRequest) {
   }
 
   const cookieStore = await cookies()
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
+  )
 
   const { data: products, error } = await supabase
     .from("products")
@@ -69,7 +77,6 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  // Rate limiting
   const rateLimitResponse = checkRateLimit(request)
   if (rateLimitResponse) return applySecurityHeaders(rateLimitResponse)
 
@@ -84,7 +91,11 @@ export async function POST(request: NextRequest) {
     const validated = productSchema.parse(body)
 
     const cookieStore = await cookies()
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
+    )
 
     const { data: product, error } = await supabase
       .from("products")
@@ -101,10 +112,11 @@ export async function POST(request: NextRequest) {
     return applySecurityHeaders(response)
   } catch (err) {
     if (err instanceof z.ZodError) {
-      const response = NextResponse.json({ error: err.errors }, { status: 400 })
+       const response = NextResponse.json({ error: err.issues }, { status: 400 })
       return applySecurityHeaders(response)
     }
     const response = NextResponse.json({ error: "Erro interno" }, { status: 500 })
     return applySecurityHeaders(response)
   }
 }
+
