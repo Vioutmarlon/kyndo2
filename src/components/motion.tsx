@@ -1,6 +1,6 @@
 "use client"
 
-import { motion, AnimatePresence, type Variants } from "framer-motion"
+import { motion, AnimatePresence, type Variants, type TargetAndTransition, type Transition, type VariantLabels } from "framer-motion"
 import { useEffect, useRef, useState, type ReactNode } from "react"
 
 /* ──────────────────────────────────────────────
@@ -448,9 +448,9 @@ export function MotionButton({
  children: ReactNode
  className?: string
  onClick?: () => void
- whileHover?: Record<string, unknown>
- whileTap?: Record<string, unknown>
- transition?: Record<string, unknown>
+ whileHover?: TargetAndTransition | VariantLabels
+ whileTap?: TargetAndTransition | VariantLabels
+ transition?: Transition
  style?: React.CSSProperties
  disabled?: boolean
  type?: "button" | "submit" | "reset"

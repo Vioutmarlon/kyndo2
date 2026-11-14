@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { formatCurrency } from "@/lib/utils"
+import { motion } from "framer-motion"
 import type { Tenant, Product } from "@/lib/supabase"
 import {
  Plus, Package, Settings, LogOut, Sparkles, Menu, X,
@@ -187,7 +188,7 @@ export function AdminDashboard({ tenant, products }: { tenant: Tenant; products:
  const renderDashboard = () => (
  <MotionDiv key="dashboard" initial={{ opacity: 0, y: 8, filter: "blur(4px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} exit={{ opacity: 0, y: -12, filter: "blur(4px)" }} transition={{ type: "spring", duration: 0.45, bounce: 0 }} style={{ display: "flex", flexDirection: "column", gap: 24 }}>
  {/* KPI Cards */}
- <StaggerContainer style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
+ <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
  {[
  { icon: TrendingUp, iconBg: C.successBg, iconColor: C.success, label: "Vendas Hoje", value: formatCurrency(todaySales), sub: `${orders.length} pedidos` },
  { icon: ShoppingCart, iconBg: C.infoBg, iconColor: C.info, label: "Pedidos", value: String(orders.length), sub: `${inProgress} em andamento` },
@@ -195,17 +196,17 @@ export function AdminDashboard({ tenant, products }: { tenant: Tenant; products:
  { icon: UtensilsCrossed, iconBg: C.orangeSoft, iconColor: C.orange, label: "Mais Vendido", value: "X-Bacon", sub: "47 vendas esta semana" },
  ].map((kpi, i) => (
  <StaggerItem key={i}>
- <InteractiveCard style={{ background: C.white, borderRadius: 14, padding: 20, border: `1px solid ${C.border}`, boxShadow: C.shadow }}>
+ <motion.div whileHover={{ boxShadow: "0px 0px 0px 1px rgba(0,0,0,0.08), 0px 1px 2px -1px rgba(0,0,0,0.08), 0px 4px 8px 0px rgba(0,0,0,0.06)" }} whileTap={{ scale: 0.97 }} transition={{ duration: 0.15 }} style={{ background: C.white, borderRadius: 14, padding: 20, border: `1px solid ${C.border}`, boxShadow: C.shadow }}>
  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
  <div style={{ width: 40, height: 40, borderRadius: 10, background: kpi.iconBg, display: "flex", alignItems: "center", justifyContent: "center" }}><kpi.icon size={20} color={kpi.iconColor} /></div>
  <span style={{ fontSize: 13, fontWeight: 500, color: C.slate }}>{kpi.label}</span>
  </div>
  <p style={{ fontSize: 28, fontWeight: 800, color: C.graphite, margin: 0, letterSpacing: "-0.02em" }}>{kpi.value}</p>
  <p style={{ fontSize: 12, color: C.slate, marginTop: 4 }}>{kpi.sub}</p>
- </InteractiveCard>
+ </motion.div>
  </StaggerItem>
  ))}
- </StaggerContainer>
+ </div>
 
  {/* Charts Row */}
  <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16 }}>
@@ -220,7 +221,7 @@ export function AdminDashboard({ tenant, products }: { tenant: Tenant; products:
  <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
  <XAxis dataKey="hora" tick={{ fontSize: 11, fill: C.slate }} axisLine={false} tickLine={false} />
  <YAxis tick={{ fontSize: 11, fill: C.slate }} axisLine={false} tickLine={false} tickFormatter={(v) => `R$${v}`} />
- <RechartsTooltip contentStyle={{ borderRadius: 8, border: `1px solid ${C.border}`, boxShadow: C.shadowMd, fontSize: 12 }} formatter={(v: number) => [formatCurrency(v), "Vendas"]} />
+ <RechartsTooltip contentStyle={{ borderRadius: 8, border: `1px solid ${C.border}`, boxShadow: C.shadowMd, fontSize: 12 }} formatter={(v: any) => [formatCurrency(Number(v)), "Vendas"]} />
  <Area type="monotone" dataKey="vendas" stroke={C.orange} strokeWidth={2.5} fill="url(#colorVendas)" />
  </AreaChart>
  </ResponsiveContainer>
@@ -285,10 +286,10 @@ export function AdminDashboard({ tenant, products }: { tenant: Tenant; products:
  {displayProducts.length === 0 ? (
  <FadeIn><div style={{ textAlign: "center", padding: "64px 0", background: C.white, borderRadius: 14, border: `1px dashed ${C.border}` }}><Package size={48} color="#D1D5DB" /><p style={{ color: C.slate, marginTop: 12 }}>Nenhum produto cadastrado</p></div></FadeIn>
  ) : (
- <StaggerContainer style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+ <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
  {displayProducts.map(product => (
  <StaggerItem key={product.id}>
- <InteractiveCard style={{ background: C.white, borderRadius: 12, padding: 16, display: "flex", alignItems: "center", gap: 16, border: `1px solid ${C.border}`, boxShadow: C.shadow }}>
+ <motion.div whileHover={{ boxShadow: "0px 0px 0px 1px rgba(0,0,0,0.08), 0px 1px 2px -1px rgba(0,0,0,0.08), 0px 4px 8px 0px rgba(0,0,0,0.06)" }} whileTap={{ scale: 0.97 }} transition={{ duration: 0.15 }} style={{ background: C.white, borderRadius: 12, padding: 16, display: "flex", alignItems: "center", gap: 16, border: `1px solid ${C.border}`, boxShadow: C.shadow }}>
  <LazyImage src={product.image_url} alt={product.name} width={56} height={56} />
  <div style={{ flex: 1, minWidth: 0 }}>
  <h3 style={{ fontWeight: 600, color: C.graphite, margin: 0, fontSize: 14 }}>{product.name}</h3>
@@ -302,10 +303,10 @@ export function AdminDashboard({ tenant, products }: { tenant: Tenant; products:
  <MotionButton whileHover={{ scale: 1.1, background: C.ice }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.15 }} style={{ padding: 8, borderRadius: 8, border: "none", background: "transparent", cursor: "pointer" }}><Edit size={16} color={C.slate} /></MotionButton>
  <MotionButton whileHover={{ scale: 1.1, background: C.dangerBg }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.15 }} style={{ padding: 8, borderRadius: 8, border: "none", background: "transparent", cursor: "pointer" }}><Trash2 size={16} color={C.danger} /></MotionButton>
  </div>
- </InteractiveCard>
+ </motion.div>
  </StaggerItem>
  ))}
- </StaggerContainer>
+ </div>
  )}
  </MotionDiv>
  )
@@ -323,7 +324,7 @@ export function AdminDashboard({ tenant, products }: { tenant: Tenant; products:
  </MotionDiv>
  )
 
- const TAB_CONTENT: Record<string, () => JSX.Element> = { dashboard: renderDashboard, products: renderProducts, settings: renderSettings }
+ const TAB_CONTENT: Record<string, () => React.JSX.Element> = { dashboard: renderDashboard, products: renderProducts, settings: renderSettings }
 
  return (
  <div style={{ display: "flex", minHeight: "100vh", background: C.ice, color: C.graphite }}>
