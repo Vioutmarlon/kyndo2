@@ -133,7 +133,36 @@ export function AdminDashboard({ tenant, products }: { tenant: Tenant; products:
  router.refresh()
  }
 
- const orders = isDemo ? DEMO_ORDERS : []
+ const [liveOrders, setLiveOrders] = useState<DemoOrder[]>([])
+
+  useEffect(() => {
+    if (isDemo) return
+    let cancelled = false
+    async function fetchOrders() {
+      try {
+        const res = await fetch("/api/admin/orders?limit=100")
+        if (!res.ok) return
+        const data = await res.json()
+        if (!cancelled) {
+          setLiveOrders(data.map((o: any) => ({
+            id: o.id,
+            customerName: o.customer_name,
+            items: Array.isArray(o.items) ? o.items.map((i: any) => `${i.quantity}x ${i.product_name}`).join(", ") : "",
+            total: Number(o.total),
+            status: o.status,
+            time: new Date(o.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
+            paymentMethod: o.payment_method === "pix" ? "Pix" : o.payment_method === "dinheiro" ? "Dinheiro" : "Cartão",
+            deliveryType: o.delivery_type,
+          })))
+        }
+      } catch { /* silent fail — fallback to empty */ }
+    }
+    fetchOrders()
+    const interval = setInterval(fetchOrders, 15000)
+    return () => { cancelled = true; clearInterval(interval) }
+  }, [isDemo])
+
+  const orders = isDemo ? DEMO_ORDERS : liveOrders
  const pending = orders.filter(o => o.status === "pending")
  const preparing = orders.filter(o => o.status === "preparing")
  const delivering = orders.filter(o => o.status === "delivering")
