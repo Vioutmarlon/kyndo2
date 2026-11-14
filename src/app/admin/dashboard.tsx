@@ -178,7 +178,32 @@ export function AdminDashboard({ tenant, products }: { tenant: Tenant; products:
  ].filter(d => d.value > 0)
 
  /* ── Kanban Sub-components ── */
- const OrderCard = ({ order, actionLabel, actionBg }: { order: DemoOrder; actionLabel: string; actionBg: string }) => (
+ const [transitioningIds, setTransitioningIds] = useState<Set<string>>(new Set())
+
+ async function handleStatusTransition(orderId: string, nextStatus: string) {
+ if (isDemo || transitioningIds.has(orderId)) return
+ setTransitioningIds(prev => new Set(prev).add(orderId))
+ try {
+ const res = await fetch(`/api/admin/orders/${orderId}`, {
+ method: "PATCH",
+ headers: { "Content-Type": "application/json" },
+ body: JSON.stringify({ status: nextStatus }),
+ })
+ if (!res.ok) {
+ const err = await res.json().catch(() => ({ error: "Erro ao atualizar status" }))
+ alert(err.error || "Falha na transição")
+ }
+ // Polling will refresh in ≤15s; no manual state update needed
+ } catch {
+ alert("Erro de conexão. Tente novamente.")
+ } finally {
+ setTransitioningIds(prev => { const s = new Set(prev); s.delete(orderId); return s })
+ }
+ }
+
+ const OrderCard = ({ order, actionLabel, actionBg, nextStatus }: { order: DemoOrder; actionLabel: string; actionBg: string; nextStatus?: string }) => {
+ const isTransitioning = transitioningIds.has(order.id)
+ return (
  <MotionDiv whileHover={{ y: -2, boxShadow: C.shadowMd }} transition={{ duration: 0.15 }}
  style={{ background: C.white, borderRadius: 10, padding: 14, border: `1px solid ${C.border}`, cursor: "default" }}>
  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
@@ -191,15 +216,18 @@ export function AdminDashboard({ tenant, products }: { tenant: Tenant; products:
  <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 99, background: C.ice, color: C.slate, fontWeight: 500 }}>{order.paymentMethod}</span>
  </div>
  <MotionButton whileTap={{ scale: 0.97 }} transition={{ duration: 0.1 }}
- style={{ width: "100%", background: actionBg, color: C.white, fontSize: 12, fontWeight: 600, padding: "8px 0", borderRadius: 8, border: "none", cursor: "pointer" }}>
- {actionLabel}
+ onClick={() => nextStatus ? handleStatusTransition(order.id, nextStatus) : undefined}
+ disabled={isTransitioning || !nextStatus}
+ style={{ width: "100%", background: actionBg, color: C.white, fontSize: 12, fontWeight: 600, padding: "8px 0", borderRadius: 8, border: "none", cursor: nextStatus ? "pointer" : "default", opacity: isTransitioning ? 0.6 : 1 }}>
+ {isTransitioning ? "Atualizando..." : actionLabel}
  </MotionButton>
  </MotionDiv>
  )
+ }
 
- const StatusColumn = ({ title, icon: Icon, headerColor, badgeBg, list, actionLabel, actionBg, emptyMsg }: {
+ const StatusColumn = ({ title, icon: Icon, headerColor, badgeBg, list, actionLabel, actionBg, emptyMsg, nextStatus }: {
  title: string; icon: any; headerColor: string; badgeBg: string
- list: DemoOrder[]; actionLabel: string; actionBg: string; emptyMsg: string
+ list: DemoOrder[]; actionLabel: string; actionBg: string; emptyMsg: string; nextStatus?: string
  }) => (
  <div style={{ background: C.white, borderRadius: 12, border: `1px solid ${C.border}`, overflow: "hidden", display: "flex", flexDirection: "column", minWidth: 240 }}>
  <div style={{ padding: "12px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${C.border}` }}>
@@ -208,7 +236,7 @@ export function AdminDashboard({ tenant, products }: { tenant: Tenant; products:
  </div>
  <div style={{ padding: 10, display: "flex", flexDirection: "column", gap: 8, flex: 1, minHeight: 140 }}>
  {list.length === 0 && <p style={{ fontSize: 12, color: "#9CA3AF", textAlign: "center", padding: "24px 0" }}>{emptyMsg}</p>}
- {list.map(o => <OrderCard key={o.id} order={o} actionLabel={actionLabel} actionBg={actionBg} />)}
+ {list.map(o => <OrderCard key={o.id} order={o} actionLabel={actionLabel} actionBg={actionBg} nextStatus={nextStatus} />)}
  </div>
  </div>
  )
@@ -281,9 +309,9 @@ export function AdminDashboard({ tenant, products }: { tenant: Tenant; products:
  <div>
  <h2 style={{ fontSize: 17, fontWeight: 700, display: "flex", alignItems: "center", gap: 8, color: C.graphite, margin: "0 0 12px" }}><ChefHat size={20} color={C.orange} /> Fila de Pedidos</h2>
  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12 }}>
- <StatusColumn title="Pendentes" icon={Clock} headerColor="#92400E" badgeBg={C.warning} list={pending} actionLabel="Iniciar Preparo" actionBg={C.orange} emptyMsg="Nenhum pedido pendente" />
- <StatusColumn title="Preparando" icon={UtensilsCrossed} headerColor="#1E40AF" badgeBg={C.info} list={preparing} actionLabel="Marcar Pronto" actionBg={C.success} emptyMsg="Nada em preparo" />
- <StatusColumn title="Entregando" icon={Truck} headerColor="#3730A3" badgeBg="#4F46E5" list={delivering} actionLabel="Confirmar Entrega" actionBg="#4F46E5" emptyMsg="Nenhuma entrega" />
+ <StatusColumn title="Pendentes" icon={Clock} headerColor="#92400E" badgeBg={C.warning} list={pending} actionLabel="Iniciar Preparo" actionBg={C.orange} emptyMsg="Nenhum pedido pendente" nextStatus="preparing" />
+ <StatusColumn title="Preparando" icon={UtensilsCrossed} headerColor="#1E40AF" badgeBg={C.info} list={preparing} actionLabel="Marcar Pronto" actionBg={C.success} emptyMsg="Nada em preparo" nextStatus="delivering" />
+ <StatusColumn title="Entregando" icon={Truck} headerColor="#3730A3" badgeBg="#4F46E5" list={delivering} actionLabel="Confirmar Entrega" actionBg="#4F46E5" emptyMsg="Nenhuma entrega" nextStatus="completed" />
  <StatusColumn title="Concluídos" icon={CheckCircle2} headerColor="#166534" badgeBg={C.success} list={completed} actionLabel="Arquivar" actionBg="#9CA3AF" emptyMsg="Nenhum concluído" />
  </div>
  </div>
