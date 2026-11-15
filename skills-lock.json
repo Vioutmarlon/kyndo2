@@ -1,6 +1,12 @@
 {
   "version": 2,
   "skills": {
+    "avoid-ai-design": {
+      "source": "funboy322/avoid-ai-design",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "5f0ad5b9e3192854cc0c6f8a49edd65d00008a942dded2f0f46dd5a2b6ad0d03"
+    },
     "supabase": {
       "source": "supabase/agent-skills",
       "sourceType": "github",
