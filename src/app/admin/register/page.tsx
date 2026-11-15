@@ -126,7 +126,7 @@ export default function AdminRegisterPage() {
  Já tenho conta → Entrar
  </Link>
  <p className="text-zinc-500 text-xs">
- DeliverySaaS &copy; 2026
+ <span className="kyndo-wordmark"><span className="text-zinc-300">kyndo</span><span className="dot">.</span></span> ORDER &copy; 2026
  </p>
  </div>
  </div>
