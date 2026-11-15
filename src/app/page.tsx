@@ -1,95 +1,329 @@
+"use client"
+
+import { useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
-import { ArrowRight, Store, Shield, Zap } from "lucide-react"
+import "./landing.css"
 
-export default function HomePage() {
- return (
- <div className="min-h-screen font-sans" style={{ background: "var(--kyndo-ice)", color: "var(--kyndo-graphite)" }}>
- {/* Header */}
- <header className="border-b border-zinc-200 bg-white/80 backdrop-blur sticky top-0 z-50">
- <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
- <Link href="/" className="flex items-center gap-1 kyndo-wordmark text-xl">
- <span style={{ color: "var(--kyndo-graphite)" }}>kyndo</span>
- <span className="dot">.</span>
- <span className="font-medium ml-1 tracking-wide text-sm" style={{ color: "var(--kyndo-slate)" }}>ORDER</span>
- </Link>
- <Link
- href="/admin/login"
- className="text-sm font-medium transition-colors hover:opacity-80"
- style={{ color: "var(--kyndo-slate)" }}
- >
- Área do Lojista
- </Link>
- </div>
- </header>
+/* ── Kyndo Order Design Tokens ── */
+const T = {
+  orange: "#FF6B35",
+  bg: "#000000",
+  fg: "#FFFFFF",
+} as const
 
- {/* Hero */}
- <section className="max-w-4xl mx-auto px-4 py-20 text-center">
- <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6" style={{ color: "var(--kyndo-graphite)" }}>
- Seu próprio app de pedidos{" "}
- <span style={{ color: "var(--kyndo-orange)" }}>sem taxa por venda</span>
- </h1>
- <p className="text-lg md:text-xl max-w-2xl mx-auto mb-10" style={{ color: "var(--kyndo-slate)" }}>
- Substitua o iFood pelo seu próprio sistema. Pedidos chegam formatados no WhatsApp,
- sem comissão, sem app pra baixar. A partir de R$47/mês.
- </p>
- <div className="flex flex-col sm:flex-row gap-4 justify-center">
- <Link
- href="/demo"
- className="text-white font-bold px-8 py-4 rounded-xl transition-colors flex items-center justify-center gap-2 text-lg shadow-lg"
- style={{ background: "var(--kyndo-orange)", boxShadow: "0 10px 25px -5px rgba(255,107,53,0.3)" }}
- >
- Ver Demo Ao Vivo <ArrowRight className="w-5 h-5" />
- </Link>
- <Link
- href="/admin/login"
- className="bg-white border border-zinc-200 hover:border-orange-400 font-medium px-8 py-4 rounded-xl transition-colors text-lg"
- style={{ color: "var(--kyndo-graphite)" }}
- >
- Já sou cliente
- </Link>
- </div>
- </section>
+/* ═══════════════════════════════════════════════════════════
+   VideoSequence — Scroll-driven video player
+   Faithful port of Nexora4's Sequence class
+   ═══════════════════════════════════════════════════════════ */
+function VideoSequence({
+  id,
+  src,
+  isFirst = false,
+  overlays,
+  onReady,
+}: {
+  id: string
+  src: string
+  isFirst?: boolean
+  overlays?: { a: number; b: number; num: string; title: string[]; desc: string }[]
+  onReady?: () => void
+}) {
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const progressRef = useRef<HTMLDivElement>(null)
+  const hintRef = useRef<HTMLDivElement>(null)
+  const loaderRef = useRef<HTMLDivElement>(null)
+  const barRef = useRef<HTMLDivElement>(null)
+  const pctRef = useRef<HTMLSpanElement>(null)
+  const logoRef = useRef<HTMLImageElement>(null)
+  const txLayerRef = useRef<HTMLDivElement>(null)
+  const overlayRefs = useRef<(HTMLDivElement | null)[]>([])
 
- {/* Features */}
- <section className="max-w-5xl mx-auto px-4 py-16 grid md:grid-cols-3 gap-6">
- {[
- {
- icon: Store,
- title: "Loja White-Label",
- desc: "Cada cliente tem sua própria loja com logo, cores e domínio personalizado.",
- },
- {
- icon: Shield,
- title: "Dados Isolados",
- desc: "Multi-tenant com RLS no Supabase. Cada lojista só vê seus próprios dados.",
- },
- {
- icon: Zap,
- title: "Pedido no WhatsApp",
- desc: "Sem gateway de pagamento complexo. O pedido chega pronto pro estabelecimento.",
- },
- ].map((feature) => (
- <div
- key={feature.title}
- className="rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow border border-zinc-100"
- style={{ background: "var(--kyndo-white)" }}
- >
- <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ background: "var(--kyndo-orange-soft)" }}>
- <feature.icon className="w-6 h-6" style={{ color: "var(--kyndo-orange)" }} />
- </div>
- <h3 className="font-bold text-lg mb-2" style={{ color: "var(--kyndo-graphite)" }}>{feature.title}</h3>
- <p className="text-sm leading-relaxed" style={{ color: "var(--kyndo-slate)" }}>{feature.desc}</p>
- </div>
- ))}
- </section>
+  // Mutable state (no React state to avoid re-renders during animation loop)
+  const state = useRef({
+    target: 0,
+    current: 0,
+    ready: false,
+    LERP: 0.22,
+  })
 
- {/* Footer */}
- <footer className="border-t border-zinc-200 py-8 text-center text-sm" style={{ color: "var(--kyndo-slate)" }}>
- <p>
- <span className="kyndo-wordmark"><span style={{ color: "var(--kyndo-graphite)" }}>kyndo</span><span className="dot">.</span></span>
- {" "}ORDER &copy; 2026 — Gestão de delivery para restaurantes
- </p>
- </footer>
- </div>
- )
+  const handleReady = useCallback(() => {
+    onReady?.()
+  }, [onReady])
+
+  useEffect(() => {
+    const video = videoRef.current
+    const section = sectionRef.current
+    const txLayer = txLayerRef.current
+    if (!video || !section) return
+
+    let cancelled = false
+    let rafId = 0
+    const st = state.current
+
+    /* ── fit: calculate video render area and set --u for overlays ── */
+    function fit() {
+      if (!txLayer || !video.videoWidth) return
+      const Wd = video.clientWidth
+      const Hd = video.clientHeight
+      const ar = video.videoWidth / video.videoHeight
+      let w: number, hh: number
+      if (Wd / Hd > ar) {
+        hh = Hd
+        w = hh * ar
+      } else {
+        w = Wd
+        hh = w / ar
+      }
+      txLayer.style.width = w + "px"
+      txLayer.style.height = hh + "px"
+      txLayer.style.left = (video.offsetLeft + (Wd - w) / 2) + "px"
+      txLayer.style.top = (video.offsetTop + (Hd - hh) / 2) + "px"
+      txLayer.style.setProperty("--u", String(w / 1280))
+      txLayer.style.display = "block"
+    }
+
+    /* ── showProgress: update loader bar during buffering ── */
+    function showProgress() {
+      if (!loaderRef.current || st.ready || !video.duration) return
+      const b = video.buffered
+      const p = b.length ? Math.min(100, Math.round((b.end(b.length - 1) / video.duration) * 100)) : 0
+      if (barRef.current) barRef.current.style.width = p + "%"
+      if (pctRef.current) pctRef.current.textContent = p + "%"
+    }
+
+    /* ── reveal: show/hide text overlays based on video progress ── */
+    function reveal() {
+      if (!overlays?.length) return
+      const p = video.duration ? Math.min(Math.max(video.currentTime / video.duration, 0), 1) : 0
+      for (let k = 0; k < overlays.length; k++) {
+        const el = overlayRefs.current[k]
+        if (!el) continue
+        const a = overlays[k].a
+        const b = overlays[k].b
+        const x = Math.min(Math.max((p - a) / (b - a), 0), 1)
+        // Smoothstep interpolation (same as Nexora4)
+        el.style.opacity = String(x * x * (3 - 2 * x))
+      }
+    }
+
+    /* ── updateLogo: fade-in logo during first 15% of video ── */
+    function updateLogo() {
+      if (!isFirst || !logoRef.current || !video.duration) return
+      const p = Math.min(Math.max(video.currentTime / video.duration, 0), 1)
+      const logoOpacity = Math.min(p / 0.15, 1)
+      const logoY = -10 + 10 * logoOpacity
+      logoRef.current.style.opacity = String(logoOpacity)
+      logoRef.current.style.transform = `translate(-50%, ${logoY}px)`
+    }
+
+    /* ── Event listeners ── */
+    video.addEventListener("progress", showProgress)
+    video.addEventListener("loadedmetadata", fit)
+    window.addEventListener("resize", fit)
+    video.addEventListener("seeked", reveal)
+
+    video.addEventListener("loadeddata", () => {
+      if (cancelled || st.ready) return
+      st.ready = true
+      if (loaderRef.current) {
+        if (barRef.current) barRef.current.style.width = "100%"
+        if (pctRef.current) pctRef.current.textContent = "100%"
+        loaderRef.current.classList.add("done")
+      }
+      fit()
+      update()
+      reveal()
+      updateLogo()
+      handleReady()
+    })
+
+    /* ── update: map scroll position to video time ── */
+    function update() {
+      if (!section) return
+      const r = section.getBoundingClientRect()
+      const max = section.offsetHeight - window.innerHeight
+      const f = max > 0 ? Math.min(Math.max(-r.top / max, 0), 1) : 0
+      st.target = (video.duration || 0) * f
+      if (progressRef.current) progressRef.current.style.transform = `scaleX(${f})`
+      if (hintRef.current) hintRef.current.style.opacity = f > 0.02 ? "0" : "1"
+    }
+
+    /* ── tick: smooth LERP interpolation for video seeking ── */
+    function tick() {
+      if (!st.ready || !video.duration) return
+      st.current += (st.target - st.current) * st.LERP
+      if (Math.abs(st.target - st.current) < 0.004) st.current = st.target
+      const t = Math.min(Math.max(st.current, 0), video.duration - 0.001)
+      if (!video.seeking && Math.abs(video.currentTime - t) > 0.012) {
+        video.currentTime = t
+      }
+      reveal()
+      updateLogo()
+    }
+
+    /* ── Load video ── */
+    video.src = src
+    video.load()
+
+    /* ── Scroll & resize handlers ── */
+    function onScroll() { update() }
+    window.addEventListener("scroll", onScroll, { passive: true })
+    window.addEventListener("resize", onScroll)
+
+    /* ── Animation loop ── */
+    function loop() {
+      tick()
+      rafId = requestAnimationFrame(loop)
+    }
+    rafId = requestAnimationFrame(loop)
+    onScroll()
+
+    /* ── iOS/Android video unlock ── */
+    function unlock() {
+      const p = video.play()
+      if (p && typeof p.then === "function") {
+        p.then(() => video.pause()).catch(() => {})
+      }
+      window.removeEventListener("touchstart", unlock)
+    }
+    window.addEventListener("touchstart", unlock, { passive: true, once: true })
+
+    /* ── Cleanup ── */
+    return () => {
+      cancelled = true
+      cancelAnimationFrame(rafId)
+      window.removeEventListener("scroll", onScroll)
+      window.removeEventListener("resize", onScroll)
+      window.removeEventListener("resize", fit)
+      window.removeEventListener("touchstart", unlock)
+      video.removeEventListener("progress", showProgress)
+      video.removeEventListener("loadedmetadata", fit)
+      video.removeEventListener("seeked", reveal)
+    }
+  }, [src, isFirst, overlays, handleReady])
+
+  return (
+    <div ref={sectionRef} className="seq" id={id}>
+      <div className={`stage ${isFirst ? "has-logo" : ""}`}>
+        {/* Progress bar */}
+        <div ref={progressRef} className="progress" />
+
+        {/* Logo (first section only) */}
+        {isFirst && (
+          <img
+            ref={logoRef}
+            src="/images/kyndo-logo-banner.png"
+            alt="Kyndo Order"
+            className="logo"
+          />
+        )}
+
+        {/* Video */}
+        <video
+          ref={videoRef}
+          muted
+          playsInline
+          preload="auto"
+          disablePictureInPicture
+          disableRemotePlayback
+          aria-label="Animação Kyndo Order"
+        />
+
+        {/* Scroll hint */}
+        {isFirst && (
+          <div ref={hintRef} className="hint">
+            Role para baixo<span>↓</span>
+          </div>
+        )}
+
+        {/* Loader */}
+        <div ref={loaderRef} className="loader">
+          <div className="bar"><div ref={barRef} /></div>
+          <p><span ref={pctRef}>0%</span></p>
+        </div>
+
+        {/* Text overlays layer (sized by JS fit()) */}
+        {overlays && (
+          <div ref={txLayerRef} className="tx-layer">
+            {overlays.map((ov, i) => (
+              <div
+                key={i}
+                ref={(el) => { overlayRefs.current[i] = el }}
+                className="tx"
+              >
+                <span className="n">{ov.num}</span>
+                <span className="t">
+                  {ov.title.map((line, li) => <span key={li}>{line}<br /></span>)}
+                </span>
+                <span className="d">{ov.desc}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Main Landing Page
+   ═══════════════════════════════════════════════════════════ */
+export default function KyndoLandingPage() {
+  return (
+    <div className="landing-page">
+      {/* ═══ SEÇÃO 1: HERO ═══ */}
+      <VideoSequence
+        id="seq1"
+        src="/videos/kyndo-hero.mp4"
+        isFirst
+        onReady={() => {
+          const v2 = document.querySelector("#seq2 video") as HTMLVideoElement
+          if (v2) { v2.src = "/videos/kyndo-features.mp4"; v2.load() }
+        }}
+      />
+
+      {/* ═══ SEÇÃO 2: FEATURES ═══ */}
+      <VideoSequence
+        id="seq2"
+        src=""
+        overlays={[
+          { a: 0.600, b: 0.665, num: "01", title: ["CARDÁPIO", "DIGITAL"], desc: "Crie seu cardápio online em minutos, com fotos, categorias e personalização completa." },
+          { a: 0.612, b: 0.677, num: "02", title: ["PEDIDOS VIA", "WHATSAPP"], desc: "Seus clientes fazem pedidos formatados direto no WhatsApp, sem intermediários." },
+          { a: 0.624, b: 0.689, num: "03", title: ["KANBAN", "OPERACIONAL"], desc: "Gerencie pedidos em tempo real: pendentes, preparando, entregando e concluídos." },
+          { a: 0.636, b: 0.701, num: "04", title: ["RELATÓRIOS", "INTELIGENTES"], desc: "Acompanhe vendas, ticket médio, produtos mais vendidos e desempenho por período." },
+          { a: 0.648, b: 0.713, num: "05", title: ["MULTI-TENANT", "SEGURO"], desc: "Cada restaurante tem dados isolados com RLS no Supabase. Segurança enterprise." },
+          { a: 0.660, b: 0.725, num: "06", title: ["ZERO", "COMISSÃO"], desc: "Diferente dos marketplaces, você não paga taxa por venda. Seu lucro é 100% seu." },
+        ]}
+        onReady={() => {
+          const v3 = document.querySelector("#seq3 video") as HTMLVideoElement
+          if (v3) { v3.src = "/videos/kyndo-demo.mp4"; v3.load() }
+        }}
+      />
+
+      {/* ═══ SEÇÃO 3: DEMO ═══ */}
+      <VideoSequence
+        id="seq3"
+        src=""
+      />
+
+      {/* ═══ SEÇÃO 4: CTA ═══ */}
+      <section className="contact" id="contato">
+        <div className="contact-copy">
+          <img className="brand" src="/images/kyndo-logo-banner.png" alt="Kyndo Order" />
+          <h2>Sua gestão de delivery <em>sem complicação</em></h2>
+          <p className="sub">Teste agora o painel completo: cardápio, pedidos, Kanban e relatórios. Sem cadastro, sem cartão, sem compromisso.</p>
+        </div>
+
+        <div className="cta-container">
+          <Link href="/demo" className="cta">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+            Acessar Demo Gratuita
+          </Link>
+          <p className="note">Ao clicar, o painel abre com dados demonstrativos. Nada é armazenado nesta página.</p>
+        </div>
+      </section>
+
+      </div>
+  )
 }

@@ -248,19 +248,19 @@ VALUES (
 );
 
 INSERT INTO categories (id, tenant_id, name, sort_order) VALUES
-  ('cat-001', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '🍔 Hambúrgueres', 1),
-  ('cat-002', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '🥤 Bebidas', 2),
-  ('cat-003', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '🍟 Acompanhamentos', 3),
-  ('cat-004', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '🍰 Sobremesas', 4);
+  ('b1000000-0000-0000-0000-000000000001', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '🍔 Hambúrgueres', 1),
+  ('b1000000-0000-0000-0000-000000000002', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '🥤 Bebidas', 2),
+  ('b1000000-0000-0000-0000-000000000003', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '🍟 Acompanhamentos', 3),
+  ('b1000000-0000-0000-0000-000000000004', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', '🍰 Sobremesas', 4);
 
 INSERT INTO products (tenant_id, category_id, name, description, price, is_available, has_options, options, sort_order) VALUES
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'cat-001', 'X-Bacon Artesanal', 'Hambúrguer 180g, bacon crocante, cheddar, cebola caramelizada, pão brioche', 32.90, true, true, '[{"name":"Ponto da carne","choices":["Mal passada","Ao ponto","Bem passada"],"required":true}]', 1),
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'cat-001', 'Double Smash Burger', 'Dois smash burgers 90g, queijo americano, picles, molho especial', 38.90, true, true, '[{"name":"Ponto da carne","choices":["Mal passada","Ao ponto","Bem passada"],"required":true}]', 2),
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'cat-001', 'Veggie Burger', 'Hambúrguer de grão-de-bico, rúcula, tomate seco, maionese verde', 29.90, true, false, '[]', 3),
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'cat-002', 'Coca-Cola Lata', '350ml gelada', 6.00, true, false, '[]', 1),
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'cat-002', 'Suco Natural', 'Laranja ou Limão - 400ml', 10.00, true, true, '[{"name":"Sabor","choices":["Laranja","Limão"],"required":true}]', 2),
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'cat-002', 'Água Mineral', '500ml sem gás', 4.00, true, false, '[]', 3),
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'cat-003', 'Batata Frita', 'Porção generosa com sal e orégano', 18.00, true, false, '[]', 1),
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'cat-003', 'Onion Rings', 'Anéis de cebola empanados e fritos', 22.00, true, false, '[]', 2),
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'cat-004', 'Brownie com Sorvete', 'Brownie de chocolate quente com bola de sorvete de creme', 24.00, true, false, '[]', 1),
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'cat-004', 'Milkshake', 'Chocolate, Morango ou Baunilha - 500ml', 22.00, true, true, '[{"name":"Sabor","choices":["Chocolate","Morango","Baunilha"],"required":true}]', 2);
+  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'b1000000-0000-0000-0000-000000000001', 'X-Bacon Artesanal', 'Hambúrguer 180g, bacon crocante, cheddar, cebola caramelizada, pão brioche', 32.90, true, true, '[{"name":"Ponto da carne","choices":["Mal passada","Ao ponto","Bem passada"],"required":true}]', 1),
+  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'b1000000-0000-0000-0000-000000000001', 'Double Smash Burger', 'Dois smash burgers 90g, queijo americano, picles, molho especial', 38.90, true, true, '[{"name":"Ponto da carne","choices":["Mal passada","Ao ponto","Bem passada"],"required":true}]', 2),
+  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'b1000000-0000-0000-0000-000000000001', 'Veggie Burger', 'Hambúrguer de grão-de-bico, rúcula, tomate seco, maionese verde', 29.90, true, false, '[]', 3),
+  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'b1000000-0000-0000-0000-000000000002', 'Coca-Cola Lata', '350ml gelada', 6.00, true, false, '[]', 1),
+  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'b1000000-0000-0000-0000-000000000002', 'Suco Natural', 'Laranja ou Limão - 400ml', 10.00, true, true, '[{"name":"Sabor","choices":["Laranja","Limão"],"required":true}]', 2),
+  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'b1000000-0000-0000-0000-000000000002', 'Água Mineral', '500ml sem gás', 4.00, true, false, '[]', 3),
+  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'b1000000-0000-0000-0000-000000000003', 'Batata Frita', 'Porção generosa com sal e orégano', 18.00, true, false, '[]', 1),
+  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'b1000000-0000-0000-0000-000000000003', 'Onion Rings', 'Anéis de cebola empanados e fritos', 22.00, true, false, '[]', 2),
+  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'b1000000-0000-0000-0000-000000000004', 'Brownie com Sorvete', 'Brownie de chocolate quente com bola de sorvete de creme', 24.00, true, false, '[]', 1),
+  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'b1000000-0000-0000-0000-000000000004', 'Milkshake', 'Chocolate, Morango ou Baunilha - 500ml', 22.00, true, true, '[{"name":"Sabor","choices":["Chocolate","Morango","Baunilha"],"required":true}]', 2);
